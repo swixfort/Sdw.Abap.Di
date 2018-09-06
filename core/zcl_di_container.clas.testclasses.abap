@@ -222,7 +222,9 @@ CLASS ltc_get_instance_should IMPLEMENTATION.
     me->_cut->get_instance( CHANGING c_target = service ).
 
     " Assert
-    cl_aunit_assert=>assert_bound( act = service msg = `Reference was not instantiated.` ).
+    IF service IS NOT BOUND.
+      cl_aunit_assert=>fail( msg = `Reference was not instantiated.` ).
+    ENDIF.
 
   ENDMETHOD.
 
@@ -236,10 +238,12 @@ CLASS ltc_get_instance_should IMPLEMENTATION.
     me->_cut->register( `zcl_di_test_dependency_1_a` ).
 
     " Act
-*    me->_cut->get_instance( changing c_target = service ).
+    me->_cut->get_instance( CHANGING c_target = service ).
 
     " Assert
-    cl_aunit_assert=>assert_bound( act = service msg = `Reference was not instantiated.` ).
+    IF service IS NOT BOUND.
+      cl_aunit_assert=>fail( msg = `Reference was not instantiated.` ).
+    ENDIF.
 
   ENDMETHOD.
 

@@ -5,8 +5,8 @@ CLASS zcl_di_container DEFINITION
 
   PUBLIC SECTION.
 
-    CONSTANTS:
-      co_default_namespace TYPE string VALUE `urn:default`.
+    CONSTANTS co_default_namespace  TYPE string VALUE `urn:default`.
+    CONSTANTS co_method_constructor TYPE string VALUE `CONSTRUCTOR`.
 
     CLASS-METHODS create_default
       IMPORTING
@@ -55,6 +55,47 @@ CLASS zcl_di_container IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD get_instance.
+
+    DATA reference_descriptor TYPE REF TO cl_abap_refdescr.
+    DATA class_descriptor TYPE REF TO cl_abap_classdescr.
+
+    IF c_target IS BOUND.
+      RAISE EXCEPTION TYPE zcx_di_target_already_bound.
+    ENDIF.
+
+    " 1. get interface/class name
+    DATA(type_descriptor) = cl_abap_typedescr=>describe_by_data( c_target ).
+    IF type_descriptor->kind NE cl_abap_typedescr=>kind_ref.
+      " TODO: No reference, what shall we do?
+      RETURN.
+    ENDIF.
+
+    reference_descriptor ?= type_descriptor.
+    DATA(referenced_type) = reference_descriptor->get_referenced_type( )->get_relative_name( ).
+
+    type_descriptor = type_descriptor->describe_by_name( referenced_type ).
+
+    CASE type_descriptor->kind.
+      WHEN cl_abap_typedescr=>kind_class
+        OR cl_abap_typedescr=>kind_intf.
+
+        " 2. get class name
+        DATA(class_name) = me->_context->get(
+          i_namespace  = me->_namespace
+          i_class_name = referenced_type ).
+
+        " 3. constructor?
+        class_descriptor ?= cl_abap_typedescr=>describe_by_name( class_name ).
+        READ TABLE class_descriptor->methods ASSIGNING FIELD-SYMBOL(<method_description>) WITH KEY name = co_method_constructor.
+        IF sy-subrc IS INITIAL.
+          " 3.1 get params of constructor
+          " 3.2
+        ELSE.
+          CREATE OBJECT c_target TYPE (class_name).
+        ENDIF.
+
+      WHEN OTHERS.
+    ENDCASE.
 
   ENDMETHOD.
 
