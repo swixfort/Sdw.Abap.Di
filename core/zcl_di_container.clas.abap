@@ -16,10 +16,10 @@ CLASS zcl_di_container DEFINITION
 
     METHODS register
       IMPORTING
-        i_class_name type string.
-    methods get_instance
-      changing
-        c_target type any.
+        i_class_name TYPE string.
+    METHODS get_instance
+      CHANGING
+        c_target TYPE any.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -40,9 +40,17 @@ ENDCLASS.
 CLASS zcl_di_container IMPLEMENTATION.
   METHOD constructor.
 
+    me->_namespace = i_namespace.
+    me->_context = i_context.
+    IF me->_context IS NOT BOUND.
+      me->_context = NEW #( ).
+    ENDIF.
+
   ENDMETHOD.
 
   METHOD create_default.
+
+    r_container = NEW #( i_context = i_context i_namespace = i_namespace ).
 
   ENDMETHOD.
 
