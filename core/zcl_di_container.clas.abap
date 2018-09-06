@@ -60,6 +60,12 @@ CLASS zcl_di_container IMPLEMENTATION.
 
   METHOD register.
 
+    IF cl_abap_typedescr=>describe_by_name( i_class_name )->kind NE cl_abap_typedescr=>kind_class.
+      RAISE EXCEPTION TYPE zcx_di_not_a_class.
+    ENDIF.
+
+    me->_context->add( i_class_name = i_class_name i_namespace = me->_namespace ).
+
   ENDMETHOD.
 
 ENDCLASS.
