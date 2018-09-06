@@ -1,0 +1,14 @@
+CLASS zcl_di_test_service_2 DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+    INTERFACES zif_di_test_service_2.
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+CLASS zcl_di_test_service_2 IMPLEMENTATION.
+ENDCLASS.
