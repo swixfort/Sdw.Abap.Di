@@ -4,6 +4,8 @@ CLASS zcl_di_test_service_2 DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
+    INTERFACES zif_di_test_service_2.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
