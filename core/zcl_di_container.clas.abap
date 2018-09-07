@@ -38,7 +38,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_DI_CONTAINER IMPLEMENTATION.
+CLASS zcl_di_container IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -68,14 +68,13 @@ CLASS ZCL_DI_CONTAINER IMPLEMENTATION.
     DATA dependency TYPE REF TO data.
 
 
-    IF c_target IS BOUND.
-      RAISE EXCEPTION TYPE zcx_di_target_already_bound.
-    ENDIF.
-
     DATA(type_descriptor) = cl_abap_typedescr=>describe_by_data( c_target ).
     IF type_descriptor->kind NE cl_abap_typedescr=>kind_ref.
-      " TODO: No reference, what shall we do?
-      RETURN.
+      RAISE EXCEPTION TYPE zcx_di_invalid_type.
+    ENDIF.
+
+    IF c_target IS BOUND.
+      RAISE EXCEPTION TYPE zcx_di_target_already_bound.
     ENDIF.
 
     reference_descriptor ?= type_descriptor.
@@ -126,24 +125,17 @@ CLASS ZCL_DI_CONTAINER IMPLEMENTATION.
             ENDIF.
           ENDLOOP.
 
-          IF parameters IS NOT INITIAL.
-            TRY.
-                CREATE OBJECT c_target TYPE (class_name)
-                  PARAMETER-TABLE parameters.
-              CATCH cx_sy_dyn_call_illegal_type INTO data(lcx_illegal_type).
-                data(output) = lcx_illegal_type->get_text( ).
-                WRITE output.
-            ENDTRY.
-          ELSE.
-            CREATE OBJECT c_target TYPE (class_name).
-          ENDIF.
+        ENDIF.
 
+        IF parameters IS NOT INITIAL.
+          CREATE OBJECT c_target TYPE (class_name)
+            PARAMETER-TABLE parameters.
         ELSE.
           CREATE OBJECT c_target TYPE (class_name).
         ENDIF.
 
       WHEN OTHERS.
-        " TODO: What to do with wrong types?
+        RAISE EXCEPTION TYPE zcx_di_invalid_type.
 
     ENDCASE.
 
@@ -159,4 +151,5 @@ CLASS ZCL_DI_CONTAINER IMPLEMENTATION.
     me->_context->add( i_class_name = i_class_name i_namespace = me->_namespace ).
 
   ENDMETHOD.
+
 ENDCLASS.
