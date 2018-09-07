@@ -119,7 +119,7 @@ RISK LEVEL HARMLESS.
       setup,
       ret_latest_cls__given_cls_name FOR TESTING,
       ret_latest_cls__given_if_name FOR TESTING,
-      ret_nothing__given_no_data FOR TESTING.
+      raise_exception__given_no_data FOR TESTING.
 
 
 
@@ -197,24 +197,26 @@ CLASS ltc_get_should IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD ret_nothing__given_no_data.
+  METHOD raise_exception__given_no_data.
 
     DATA class_name TYPE string.
 
     " Arrange
 
     " Act
-    class_name = me->_cut->get(
-                   i_namespace  = co_default_namespace
-                   i_class_name = `ZCL_DI_TEST_SERVICE_1`
-               ).
+    TRY.
+        class_name = me->_cut->get(
+                       i_namespace  = co_default_namespace
+                       i_class_name = `ZCL_DI_TEST_SERVICE_1`
+                   ).
 
-    " Assert
-    cl_aunit_assert=>assert_equals(
-      act = class_name
-      exp = ``
-      msg = `Something was returned despite no data was provided.`
-    ).
+        " Assert
+        cl_aunit_assert=>fail(
+          msg = `Something was returned despite no data was provided.`
+        ).
+      CATCH zcx_di_class_not_found.
+    ENDTRY.
+
 
   ENDMETHOD.
 

@@ -72,6 +72,10 @@ CLASS zcl_di_context IMPLEMENTATION.
 
     ENDLOOP.
 
+    IF r_class_name IS INITIAL.
+      RAISE EXCEPTION TYPE zcx_di_class_not_found.
+    ENDIF.
+
   ENDMETHOD.
 
 ENDCLASS.
