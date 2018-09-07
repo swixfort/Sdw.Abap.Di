@@ -181,7 +181,8 @@ RISK LEVEL HARMLESS.
       return_inst__given_class FOR TESTING,
       ret_instance_with_dependecies FOR TESTING,
       raise_err__given_miss_dpendncy FOR TESTING,
-      raise_err__given_already_bound FOR TESTING.
+      raise_err__given_already_bound FOR TESTING,
+      raise_exception_given_inv_type FOR TESTING.
 
 ENDCLASS.
 
@@ -238,12 +239,13 @@ CLASS ltc_get_instance_should IMPLEMENTATION.
     me->_cut->register( `zcl_di_test_dependency_1_a` ).
 
     " Act
-    me->_cut->get_instance( CHANGING c_target = service ).
+    TRY.
+        me->_cut->get_instance( CHANGING c_target = service ).
 
-    " Assert
-    IF service IS NOT BOUND.
-      cl_aunit_assert=>fail( msg = `Reference was not instantiated.` ).
-    ENDIF.
+        " Assert
+        cl_aunit_assert=>fail( msg = `Exception was not triggered despite missing dependency.` ).
+      CATCH zcx_di_class_not_found.
+    ENDTRY.
 
   ENDMETHOD.
 
@@ -282,6 +284,24 @@ CLASS ltc_get_instance_should IMPLEMENTATION.
 
     " Assert
     cl_aunit_assert=>assert_bound( act = service msg = `Reference was not instantiated.` ).
+
+  ENDMETHOD.
+
+  METHOD raise_exception_given_inv_type.
+
+    DATA service TYPE vbeln.
+
+    " Arrange
+    me->_cut->register( `ZCL_DI_TEST_SERVICE_2` ).
+
+    " Act
+    TRY.
+        me->_cut->get_instance( CHANGING c_target = service ).
+
+        " Assert
+        cl_aunit_assert=>fail( msg = `Exception was not raised despite invalid type.` ).
+      CATCH zcx_di_invalid_type.
+    ENDTRY.
 
   ENDMETHOD.
 
