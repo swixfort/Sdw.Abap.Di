@@ -238,12 +238,13 @@ CLASS ltc_get_instance_should IMPLEMENTATION.
     me->_cut->register( `zcl_di_test_dependency_1_a` ).
 
     " Act
-    me->_cut->get_instance( CHANGING c_target = service ).
+    TRY.
+        me->_cut->get_instance( CHANGING c_target = service ).
 
-    " Assert
-    IF service IS NOT BOUND.
-      cl_aunit_assert=>fail( msg = `Reference was not instantiated.` ).
-    ENDIF.
+        " Assert
+        cl_aunit_assert=>fail( msg = `Exception was not triggered despite missing dependency.` ).
+      CATCH zcx_di_class_not_found.
+    ENDTRY.
 
   ENDMETHOD.
 

@@ -38,7 +38,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_di_container IMPLEMENTATION.
+CLASS ZCL_DI_CONTAINER IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -72,7 +72,6 @@ CLASS zcl_di_container IMPLEMENTATION.
       RAISE EXCEPTION TYPE zcx_di_target_already_bound.
     ENDIF.
 
-    " 1. get interface/class name
     DATA(type_descriptor) = cl_abap_typedescr=>describe_by_data( c_target ).
     IF type_descriptor->kind NE cl_abap_typedescr=>kind_ref.
       " TODO: No reference, what shall we do?
@@ -111,7 +110,7 @@ CLASS zcl_di_container IMPLEMENTATION.
                 DATA(parameter_type) = reference_descriptor->get_referenced_type( )->get_relative_name( ).
               ENDIF.
 
-              new_parameter-kind = <parameter_description>-parm_kind.
+              new_parameter-kind = 'E'.
               new_parameter-name = <parameter_description>-name.
 
               CREATE DATA dependency TYPE REF TO (parameter_type).
@@ -119,8 +118,9 @@ CLASS zcl_di_container IMPLEMENTATION.
 
               me->get_instance( CHANGING c_target = <dependency> ).
 
-*              GET REFERENCE OF dependency INTO new_parameter-value.
-              new_parameter-value = dependency.
+*              DATA(parameter_class_type) = cl_abap_classdescr=>describe_by_object_ref( <dependency> )->get_relative_name( ).
+              CREATE DATA new_parameter-value TYPE REF TO object.
+              new_parameter-value ?= dependency.
               INSERT new_parameter INTO TABLE parameters.
 
             ENDIF.
@@ -130,8 +130,9 @@ CLASS zcl_di_container IMPLEMENTATION.
             TRY.
                 CREATE OBJECT c_target TYPE (class_name)
                   PARAMETER-TABLE parameters.
-              CATCH cx_sy_dyn_call_illegal_type.
-              write `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH!!!!!`.
+              CATCH cx_sy_dyn_call_illegal_type INTO data(lcx_illegal_type).
+                data(output) = lcx_illegal_type->get_text( ).
+                WRITE output.
             ENDTRY.
           ELSE.
             CREATE OBJECT c_target TYPE (class_name).
@@ -142,6 +143,8 @@ CLASS zcl_di_container IMPLEMENTATION.
         ENDIF.
 
       WHEN OTHERS.
+        " TODO: What to do with wrong types?
+
     ENDCASE.
 
   ENDMETHOD.
