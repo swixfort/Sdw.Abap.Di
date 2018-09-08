@@ -1,12 +1,11 @@
 CLASS zcx_di_not_a_class DEFINITION
   PUBLIC
-  INHERITING FROM cx_no_check
+  INHERITING FROM zcx_di
   FINAL
   CREATE PUBLIC .
 
   PUBLIC SECTION.
 
-    INTERFACES if_t100_message .
 
     METHODS constructor
       IMPORTING
