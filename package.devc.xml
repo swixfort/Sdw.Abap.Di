@@ -4,6 +4,8 @@
   <asx:values>
    <DEVC>
     <CTEXT>Dependency Injection</CTEXT>
+    <RESTRICTED>X</RESTRICTED>
+    <MAINPACK>X</MAINPACK>
    </DEVC>
   </asx:values>
  </asx:abap>
