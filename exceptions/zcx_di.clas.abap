@@ -1,11 +1,11 @@
-CLASS zcx_di_invalid_type DEFINITION
+CLASS zcx_di DEFINITION
   PUBLIC
-  INHERITING FROM zcx_di
-  FINAL
+  INHERITING FROM cx_no_check
   CREATE PUBLIC .
 
   PUBLIC SECTION.
 
+    INTERFACES if_t100_message .
 
     METHODS constructor
       IMPORTING
@@ -17,7 +17,7 @@ ENDCLASS.
 
 
 
-CLASS zcx_di_invalid_type IMPLEMENTATION.
+CLASS zcx_di IMPLEMENTATION.
 
 
   METHOD constructor ##ADT_SUPPRESS_GENERATION.
