@@ -9,15 +9,40 @@ CLASS zcl_di_container DEFINITION
     CONSTANTS co_method_constructor TYPE string VALUE `CONSTRUCTOR`.
     CONSTANTS co_interface_or_class TYPE string VALUE `IC`.
 
+    "! <p class="shorttext synchronized" lang="en">This will create a new DI-Container</p>
+    "! If no <strong>context</strong> will be provided a default one will be created.
+    "! owever, it is possible to use one container across multiple containers.
+    "! One can differentiate classes with <strong>namespace</strong>s or use the same.<br/>
+    "! If no <strong>namespace</strong> will be provided a default one will be used.
+    "!
+    "! @parameter i_context | <p class="shorttext synchronized" lang="en">Context where the classes to resolve will be stored.</p>
+    "! @parameter i_namespace | <p class="shorttext synchronized" lang="en">Namespace to differ between multiple containers and context.</p>
+    "! @parameter r_container | <p class="shorttext synchronized" lang="en">A new DI-Container</p>
     CLASS-METHODS create_default
       IMPORTING
                 i_context          TYPE REF TO zcl_di_context OPTIONAL
                 i_namespace        TYPE string DEFAULT co_default_namespace
       RETURNING VALUE(r_container) TYPE REF TO zcl_di_container.
 
+    "! <p class="shorttext synchronized" lang="en">This method registers a class with the context.</p>
+    "! When <strong>i_class_name</strong> is not a class, the exception type <strong>zcx_di_not_a_class</strong> will be raised.
+    "!
+    "! @parameter i_class_name | <p class="shorttext synchronized" lang="en">Class name to be registered</p>
     METHODS register
       IMPORTING
         i_class_name TYPE string.
+
+    "! <p class="shorttext synchronized" lang="en">This method tries to resolve dependencies.</p>
+    "! With this method all dependencies will be resolved and <strong>c_target</strong> will be instantiated if it is possible.<br/>
+    "!
+    "! Following Exceptions can be raised during this method call:
+    "! <ul>
+    "! <li>zcx_di_target_already_bound : <strong>c_target</strong> is already bound</li>
+    "! <li>zcx_di_invalid_type : <strong>c_target</strong> is neither an interface nor a class</li>
+    "! <li>zcx_di_class_not_found : Not enough classes were registered using <strong>register</strong></li>
+    "! </ul>
+    "!
+    "! @parameter c_target | <p class="shorttext synchronized" lang="en"></p>
     METHODS get_instance
       CHANGING
         c_target TYPE any.

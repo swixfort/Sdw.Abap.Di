@@ -13,11 +13,22 @@ CLASS zcl_di_context DEFINITION
 
       ty_class_register TYPE STANDARD TABLE OF ty_class_register_entity WITH KEY time_added.
 
+    "! <p class="shorttext synchronized" lang="en">Adding classes to the context</p>
+    "!
+    "! @parameter i_namespace | <p class="shorttext synchronized" lang="en"></p>
+    "! @parameter i_class_name | <p class="shorttext synchronized" lang="en"></p>
     METHODS add
       IMPORTING
         i_namespace  TYPE string
         i_class_name TYPE string.
 
+    "! <p class="shorttext synchronized" lang="en">Getting classes from context based on interface or class.</p>
+    "! This method may raise <strong>zcx_di_class_not_found</strong> when there was no class in the context
+    "! which <strong>i_class_name</strong> applies to.
+    "!
+    "! @parameter i_namespace | <p class="shorttext synchronized" lang="en">Namespace to look up.</p>
+    "! @parameter i_class_name | <p class="shorttext synchronized" lang="en">Class name or interface</p>
+    "! @parameter r_class_name | <p class="shorttext synchronized" lang="en">Found class name</p>
     METHODS get
       IMPORTING
                 i_namespace         TYPE string
