@@ -46,7 +46,7 @@ interface ZIF_DI_TEST_DEPENDENCY_2
 endinterface.
 ```
 
-This class is the _main_ class which has to dependencies. Those dependencies are __non__ optional parameters of type _type ref to class_ or _type ref to interface_.
+This class is the _main_ class which has two dependencies. Those dependencies are __non__ optional parameters of type _type ref to class_ or _type ref to interface_.
 ```ABAP
 CLASS zcl_di_test_service_1 DEFINITION
   PUBLIC
