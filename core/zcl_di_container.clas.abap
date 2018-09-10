@@ -142,7 +142,6 @@ CLASS zcl_di_container IMPLEMENTATION.
 
               me->get_instance( CHANGING c_target = <dependency> ).
 
-*              DATA(parameter_class_type) = cl_abap_classdescr=>describe_by_object_ref( <dependency> )->get_relative_name( ).
               CREATE DATA new_parameter-value TYPE REF TO object.
               new_parameter-value ?= dependency.
               INSERT new_parameter INTO TABLE parameters.
