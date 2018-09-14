@@ -1,31 +1,36 @@
-CLASS zcl_di_test_service_1 DEFINITION
-  PUBLIC
-  FINAL
-  CREATE PUBLIC .
+class zcl_di_test_service_1 definition
+  public
+  final
+  create public .
 
-  PUBLIC SECTION.
-  interfaces zif_di_test_service_1.
+  public section.
+    interfaces zif_di_test_service_1.
 
-  methods constructor
-    IMPORTING
-      i_dependency_1 TYPE REF TO zif_di_test_dependency_1
-      i_dependency_2 TYPE REF TO zif_di_test_dependency_2.
-
-  PROTECTED SECTION.
-  PRIVATE SECTION.
-  data _dependency_1 TYPE REF TO zif_di_test_dependency_1.
-  data _dependency_2 TYPE REF TO zif_di_test_dependency_2.
-
-ENDCLASS.
-
+    methods:
+      constructor
+        importing
+          i_dependency_1 type ref to zif_di_test_dependency_1
+          i_dependency_2 type ref to zif_di_test_dependency_2.
+  protected section.
+  private section.
+    data _dependency_1 type ref to zif_di_test_dependency_1.
+    data _dependency_2 type ref to zif_di_test_dependency_2.
+endclass.
 
 
-CLASS zcl_di_test_service_1 IMPLEMENTATION.
-  METHOD constructor.
+
+class zcl_di_test_service_1 implementation.
+  method constructor.
 
     me->_dependency_1 = i_dependency_1.
     me->_dependency_2 = i_dependency_2.
 
-  ENDMETHOD.
+  endmethod.
 
-ENDCLASS.
+  method zif_di_test_service_1~write.
+
+    write: `zcl_di_test_service_1`.
+
+  endmethod.
+
+endclass.
