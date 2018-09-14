@@ -1,24 +1,24 @@
 *"* use this source file for your ABAP unit test classes
-CLASS ltc_create_default_should DEFINITION FOR TESTING
-DURATION SHORT
-RISK LEVEL HARMLESS.
+class ltc_create_default_should definition for testing final
+duration short
+risk level harmless.
 
-  PRIVATE SECTION.
+  private section.
 
-    METHODS:
-      create_instance_with_defaults FOR TESTING,
+    methods:
+      create_instance_with_defaults for testing,
       "! not overwrite context, given context is provided
-      set_context__given_provided FOR TESTING,
-      set_namespace__given_provided FOR TESTING.
-ENDCLASS.
+      set_context__given_provided for testing,
+      set_namespace__given_provided for testing.
+endclass.
 
-CLASS ltc_create_default_should IMPLEMENTATION.
+class ltc_create_default_should implementation.
 
-  METHOD create_instance_with_defaults.
+  method create_instance_with_defaults.
 
-    DATA:
-      container TYPE REF TO zcl_di_container,
-      passed    TYPE abap_bool.
+    data:
+      container type ref to zcl_di_container,
+      passed    type abap_bool.
 
     " Arrange
 
@@ -30,7 +30,7 @@ CLASS ltc_create_default_should IMPLEMENTATION.
         act = container
         msg = `DI container was NOT created` ).
 
-    IF passed = abap_true.
+    if passed = abap_true.
       cl_aunit_assert=>assert_bound(
           act = container->_context
           msg = `DI context was NOT created` ).
@@ -39,18 +39,18 @@ CLASS ltc_create_default_should IMPLEMENTATION.
           act = container->_namespace
           exp = 'urn:default'
           msg = `DI namespace is NOT correct` ).
-    ENDIF.
+    endif.
 
-  ENDMETHOD.
+  endmethod.
 
-  METHOD set_context__given_provided.
+  method set_context__given_provided.
 
-    DATA:
-      container TYPE REF TO zcl_di_container,
-      context   TYPE REF TO zcl_di_context.
+    data:
+      container type ref to zcl_di_container,
+      context   type ref to zcl_di_context.
 
     " Arrange
-    CREATE OBJECT context.
+    create object context.
 
     " Act
     container = zcl_di_container=>create_default( i_context = context ).
@@ -62,13 +62,13 @@ CLASS ltc_create_default_should IMPLEMENTATION.
         exp = context
         msg = `DI context was NOT set correctly` ).
 
-  ENDMETHOD.
+  endmethod.
 
-  METHOD set_namespace__given_provided.
+  method set_namespace__given_provided.
 
-    DATA:
-      container TYPE REF TO zcl_di_container,
-      namespace TYPE string.
+    data:
+      container type ref to zcl_di_container,
+      namespace type string.
 
     " Arrange
     namespace = `urn:custom_namespace`.
@@ -83,60 +83,61 @@ CLASS ltc_create_default_should IMPLEMENTATION.
         exp = namespace
         msg = `DI namespace was NOT set correctly` ).
 
-  ENDMETHOD.
+  endmethod.
 
-ENDCLASS.
+endclass.
 
 
-CLASS ltc_register_should DEFINITION FOR TESTING
-  DURATION SHORT
-  RISK LEVEL HARMLESS.
+class ltc_register_should definition for testing final
+  duration short
+  risk level harmless.
 
-  PRIVATE SECTION.
-    DATA:
-      _cut TYPE REF TO zcl_di_container.  "class under test
+  private section.
+    data:
+      _cut type ref to zcl_di_container.  "class under test
 
-    METHODS:
+    methods:
       setup,
-      raise_error__given_no_class FOR TESTING,
-      register_class_to_context FOR TESTING,
-      allow_mixed_case FOR TESTING.
+      raise_error__given_no_class for testing,
+      register_class_to_context for testing,
+      allow_mixed_case for testing.
 
-ENDCLASS.       "ltc_Container_Should
+endclass.       "ltc_Container_Should
 
 
-CLASS ltc_register_should IMPLEMENTATION.
+class ltc_register_should implementation.
 
-  METHOD setup.
+  method setup.
 
     me->_cut = zcl_di_container=>create_default( ).
 
-  ENDMETHOD.
+  endmethod.
 
-  METHOD raise_error__given_no_class.
+  method raise_error__given_no_class.
 
     " Arrange
 
     " Act
-    TRY.
+    try.
         me->_cut->register( `VBELN` ).
 
         " Assert
         cl_aunit_assert=>fail( msg = `Registration successful despite no valid class.` ).
-      CATCH zcx_di_not_a_class.
-    ENDTRY.
+      catch zcx_di_not_a_class.
+                                                        "#EC NO_HANDLER
+    endtry.
 
-  ENDMETHOD.
+  endmethod.
 
-  METHOD register_class_to_context.
+  method register_class_to_context.
 
-    DATA actual_name TYPE string.
+    data actual_name type string.
     " Arrange
     " Act
     me->_cut->register( `ZCL_DI_TEST_SERVICE_1` ).
     actual_name = me->_cut->_context->get(
         i_namespace  = me->_cut->_namespace
-        i_class_name = `ZCL_DI_TEST_SERVICE_1` ).
+        i_class_name = `ZCL_DI_TEST_SERVICE_1` )->class_name( ).
 
     " Assert
     cl_aunit_assert=>assert_equals(
@@ -145,17 +146,17 @@ CLASS ltc_register_should IMPLEMENTATION.
       msg = `Class was not registered in context` ).
 
 
-  ENDMETHOD.
+  endmethod.
 
-  METHOD allow_mixed_case.
+  method allow_mixed_case.
 
-    DATA actual_name TYPE string.
+    data actual_name type string.
     " Arrange
     " Act
     me->_cut->register( `Zcl_DI_teST_SERvICE_1` ).
     actual_name = me->_cut->_context->get(
         i_namespace  = me->_cut->_namespace
-        i_class_name = `ZCL_DI_TEST_SERVICE_1` ).
+        i_class_name = `ZCL_DI_TEST_SERVICE_1` )->class_name( ).
 
     " Assert
     cl_aunit_assert=>assert_equals(
@@ -163,55 +164,69 @@ CLASS ltc_register_should IMPLEMENTATION.
       exp = `ZCL_DI_TEST_SERVICE_1`
       msg = `Class was not registered in context` ).
 
-  ENDMETHOD.
+  endmethod.
 
-ENDCLASS.       "ltc_Container_Should
+endclass.
 
-CLASS ltc_get_instance_should DEFINITION FOR TESTING
-DURATION SHORT
-RISK LEVEL HARMLESS.
+class ltc_register_instance_should definition for testing final
+duration short
+risk level harmless.
 
-  PRIVATE SECTION.
+  private section.
 
-    DATA _cut TYPE REF TO zcl_di_container.
+    data _cut type ref to zcl_di_container.
 
-    METHODS:
+    methods setup.
+    methods register_instance_to_context.
+    methods register_class_to_context.
+
+endclass.
+
+class ltc_get_instance_should definition for testing final
+duration short
+risk level harmless.
+
+  private section.
+
+    data _cut type ref to zcl_di_container.
+
+    methods:
       setup,
-      return_instance FOR TESTING,
-      return_inst__given_class FOR TESTING,
-      ret_instance_with_dependecies FOR TESTING,
-      raise_err__given_miss_dpendncy FOR TESTING,
-      raise_err__given_already_bound FOR TESTING,
-      raise_exception_given_inv_type FOR TESTING.
+      return_instance for testing,
+      return_inst__given_class for testing,
+      ret_instance_with_dependecies for testing,
+      raise_err__given_miss_dpendncy for testing,
+      raise_err__given_already_bound for testing,
+      raise_exception_given_inv_type for testing.
 
-ENDCLASS.
+endclass.
 
-CLASS ltc_get_instance_should IMPLEMENTATION.
+class ltc_get_instance_should implementation.
 
-  METHOD setup.
+  method setup.
 
     me->_cut = zcl_di_container=>create_default( ).
 
-  ENDMETHOD.
+  endmethod.
 
-  METHOD return_instance.
+  method return_instance.
 
-    DATA service TYPE REF TO zif_di_test_service_2.
+    data service type ref to zif_di_test_service_2.
 
     " Arrange
     me->_cut->register( `ZCL_DI_TEST_SERVICE_2` ).
 
     " Act
-    me->_cut->get_instance( CHANGING c_target = service ).
+    me->_cut->get_instance( changing c_target = service ).
 
     " Assert
     cl_aunit_assert=>assert_bound( act = service msg = `Reference was not instantiated.` ).
 
-  ENDMETHOD.
+  endmethod.
 
-  METHOD ret_instance_with_dependecies.
+  method ret_instance_with_dependecies.
 
-    DATA service TYPE REF TO zif_di_test_service_1.
+    data service type ref to zif_di_test_service_1.
 
 
     " Arrange
@@ -220,18 +235,18 @@ CLASS ltc_get_instance_should IMPLEMENTATION.
     me->_cut->register( `zcl_di_test_dependency_2` ).
 
     " Act
-    me->_cut->get_instance( CHANGING c_target = service ).
+    me->_cut->get_instance( changing c_target = service ).
 
     " Assert
-    IF service IS NOT BOUND.
+    if service is not bound.
       cl_aunit_assert=>fail( msg = `Reference was not instantiated.` ).
-    ENDIF.
+    endif.
 
-  ENDMETHOD.
+  endmethod.
 
-  METHOD raise_err__given_miss_dpendncy.
+  method raise_err__given_miss_dpendncy.
 
-    DATA service TYPE REF TO zif_di_test_service_1.
+    data service type ref to zif_di_test_service_1.
 
 
     " Arrange
@@ -239,70 +254,73 @@ CLASS ltc_get_instance_should IMPLEMENTATION.
     me->_cut->register( `zcl_di_test_dependency_1_a` ).
 
     " Act
-    TRY.
-        me->_cut->get_instance( CHANGING c_target = service ).
+    try.
+        me->_cut->get_instance( changing c_target = service ).
 
         " Assert
         cl_aunit_assert=>fail( msg = `Exception was not triggered despite missing dependency.` ).
-      CATCH zcx_di_class_not_found.
-    ENDTRY.
+      catch zcx_di_class_not_found.
+                                                        "#EC NO_HANDLER
+    endtry.
 
-  ENDMETHOD.
+  endmethod.
 
-  METHOD raise_err__given_already_bound.
+  method raise_err__given_already_bound.
 
-    DATA service TYPE REF TO zif_di_test_service_2.
+    data service type ref to zif_di_test_service_2.
 
     " Arrange
-    CREATE OBJECT service TYPE zcl_di_test_service_2.
+    create object service type zcl_di_test_service_2.
     me->_cut->register( `ZCL_DI_TEST_SERVICE_2` ).
 
-    TRY.
+    try.
         " Act
         me->_cut->get_instance(
-          CHANGING
+          changing
             c_target = service
         ).
 
         " Assert
         cl_aunit_assert=>fail( msg = `No exception was thrown despite already bound parameter.`).
 
-      CATCH zcx_di_target_already_bound.
-    ENDTRY.
+      catch zcx_di_target_already_bound.
+                                                        "#EC NO_HANDLER
+    endtry.
 
-  ENDMETHOD.
+  endmethod.
 
-  METHOD return_inst__given_class.
+  method return_inst__given_class.
 
-    DATA service TYPE REF TO zcl_di_test_service_2.
+    data service type ref to zcl_di_test_service_2.
 
     " Arrange
     me->_cut->register( `ZCL_DI_TEST_SERVICE_2` ).
 
     " Act
-    me->_cut->get_instance( CHANGING c_target = service ).
+    me->_cut->get_instance( changing c_target = service ).
 
     " Assert
     cl_aunit_assert=>assert_bound( act = service msg = `Reference was not instantiated.` ).
 
-  ENDMETHOD.
+  endmethod.
 
-  METHOD raise_exception_given_inv_type.
+  method raise_exception_given_inv_type.
 
-    DATA service TYPE vbeln.
+    data service type vbeln.
 
     " Arrange
     me->_cut->register( `ZCL_DI_TEST_SERVICE_2` ).
 
     " Act
-    TRY.
-        me->_cut->get_instance( CHANGING c_target = service ).
+    try.
+        me->_cut->get_instance( changing c_target = service ).
 
         " Assert
         cl_aunit_assert=>fail( msg = `Exception was not raised despite invalid type.` ).
-      CATCH zcx_di_invalid_type.
-    ENDTRY.
+      catch zcx_di_invalid_type.
+                                                        "#EC NO_HANDLER
+    endtry.
 
-  ENDMETHOD.
+  endmethod.
 
-ENDCLASS.
+endclass.

@@ -1,13 +1,13 @@
-CLASS zcl_di_container DEFINITION
-  PUBLIC
-  FINAL
-  CREATE PRIVATE .
+class zcl_di_container definition
+  public
+  final
+  create private .
 
-  PUBLIC SECTION.
+  public section.
 
-    CONSTANTS co_default_namespace  TYPE string VALUE `urn:default`.
-    CONSTANTS co_method_constructor TYPE string VALUE `CONSTRUCTOR`.
-    CONSTANTS co_interface_or_class TYPE string VALUE `IC`.
+    constants co_default_namespace  type string value `urn:default`.
+    constants co_method_constructor type string value `CONSTRUCTOR`.
+    constants co_interface_or_class type string value `IC`.
 
     "! <p class="shorttext synchronized" lang="en">This will create a new DI-Container</p>
     "! If no <strong>context</strong> will be provided a default one will be created.
@@ -18,19 +18,20 @@ CLASS zcl_di_container DEFINITION
     "! @parameter i_context | <p class="shorttext synchronized" lang="en">Context where the classes to resolve will be stored.</p>
     "! @parameter i_namespace | <p class="shorttext synchronized" lang="en">Namespace to differ between multiple containers and context.</p>
     "! @parameter r_container | <p class="shorttext synchronized" lang="en">A new DI-Container</p>
-    CLASS-METHODS create_default
-      IMPORTING
-                i_context          TYPE REF TO zcl_di_context OPTIONAL
-                i_namespace        TYPE string DEFAULT co_default_namespace
-      RETURNING VALUE(r_container) TYPE REF TO zcl_di_container.
+    class-methods create_default
+      importing
+                i_context          type ref to zcl_di_context optional
+                i_namespace        type string default co_default_namespace
+      returning value(r_container) type ref to zcl_di_container.
 
     "! <p class="shorttext synchronized" lang="en">This method registers a class with the context.</p>
     "! When <strong>i_class_name</strong> is not a class, the exception type <strong>zcx_di_not_a_class</strong> will be raised.
     "!
     "! @parameter i_class_name | <p class="shorttext synchronized" lang="en">Class name to be registered</p>
-    METHODS register
-      IMPORTING
-        i_class_name TYPE string.
+    methods register
+      importing
+        i_class_name type string
+      returning value(r_class_entity) type ref to zcl_di_class_entity.
 
     "! <p class="shorttext synchronized" lang="en">This method tries to resolve dependencies.</p>
     "! With this method all dependencies will be resolved and <strong>c_target</strong> will be instantiated if it is possible.<br/>
@@ -43,137 +44,155 @@ CLASS zcl_di_container DEFINITION
     "! </ul>
     "!
     "! @parameter c_target | <p class="shorttext synchronized" lang="en"></p>
-    METHODS get_instance
-      CHANGING
-        c_target TYPE any.
+    methods get_instance
+      changing
+        c_target type any.
 
-  PROTECTED SECTION.
-  PRIVATE SECTION.
+  protected section.
+  private section.
 
-    DATA _context TYPE REF TO zcl_di_context.
-    DATA _namespace TYPE string.
+    data _context type ref to zcl_di_context.
+    data _namespace type string.
 
-    METHODS:
+    methods:
       constructor
-        IMPORTING
-          i_context   TYPE REF TO zcl_di_context
-          i_namespace TYPE string.
+        importing
+          i_context   type ref to zcl_di_context
+          i_namespace type string.
 
-ENDCLASS.
-
-
-
-CLASS zcl_di_container IMPLEMENTATION.
+endclass.
 
 
-  METHOD constructor.
+
+class zcl_di_container implementation.
+
+
+  method constructor.
 
     me->_namespace = i_namespace.
     me->_context = i_context.
-    IF me->_context IS NOT BOUND.
-      me->_context = NEW #( ).
-    ENDIF.
+    if me->_context is not bound.
+      create object me->_context.
+    endif.
 
-  ENDMETHOD.
-
-
-  METHOD create_default.
-
-    r_container = NEW #( i_context = i_context i_namespace = i_namespace ).
-
-  ENDMETHOD.
+  endmethod.
 
 
-  METHOD get_instance.
+  method create_default.
 
-    DATA reference_descriptor TYPE REF TO cl_abap_refdescr.
-    DATA class_descriptor TYPE REF TO cl_abap_classdescr.
-    DATA new_parameter TYPE abap_parmbind.
-    DATA parameters TYPE abap_parmbind_tab.
-    DATA dependency TYPE REF TO data.
+    create object r_container
+      exporting
+        i_context   = i_context
+        i_namespace = i_namespace.
+
+  endmethod.
 
 
-    DATA(type_descriptor) = cl_abap_typedescr=>describe_by_data( c_target ).
-    IF type_descriptor->kind NE cl_abap_typedescr=>kind_ref.
-      RAISE EXCEPTION TYPE zcx_di_invalid_type.
-    ENDIF.
+  method get_instance.
 
-    IF c_target IS BOUND.
-      RAISE EXCEPTION TYPE zcx_di_target_already_bound.
-    ENDIF.
+    data reference_descriptor type ref to cl_abap_refdescr.
+    data class_descriptor type ref to cl_abap_classdescr.
+    data new_parameter type abap_parmbind.
+    data parameters type abap_parmbind_tab.
+    data dependency type ref to data.
+    data type_descriptor type ref to cl_abap_typedescr.
+    data class_name type string.
+    data referenced_type_name type string.
+    data parameter_type type string.
+    data class_entity type ref to zcl_di_class_entity.
+
+    field-symbols <method_description> type abap_methdescr.
+    field-symbols <parameter_description> type abap_parmdescr.
+    field-symbols <dependency> type any.
+
+
+    type_descriptor = cl_abap_typedescr=>describe_by_data( c_target ).
+    if type_descriptor->kind ne cl_abap_typedescr=>kind_ref.
+      raise exception type zcx_di_invalid_type.
+    endif.
+
+    if c_target is bound.
+      raise exception type zcx_di_target_already_bound.
+    endif.
 
     reference_descriptor ?= type_descriptor.
-    DATA(referenced_type) = reference_descriptor->get_referenced_type( )->get_relative_name( ).
+    referenced_type_name = reference_descriptor->get_referenced_type( )->get_relative_name( ).
 
-    type_descriptor = type_descriptor->describe_by_name( referenced_type ).
+    type_descriptor = type_descriptor->describe_by_name( referenced_type_name ).
 
-    CASE type_descriptor->kind.
-      WHEN cl_abap_typedescr=>kind_class
-        OR cl_abap_typedescr=>kind_intf.
+    case type_descriptor->kind.
+      when cl_abap_typedescr=>kind_class
+        or cl_abap_typedescr=>kind_intf.
 
-        DATA(class_name) = me->_context->get(
+        class_entity = me->_context->get(
           i_namespace  = me->_namespace
-          i_class_name = referenced_type ).
+          i_class_name = referenced_type_name ).
+        if class_entity->instance( ) is bound.
+          c_target ?= class_entity->instance( ).
+          return.
+        else.
+          class_name = class_entity->class_name( ).
+        endif.
 
         class_descriptor ?= cl_abap_typedescr=>describe_by_name( class_name ).
-        READ TABLE class_descriptor->methods ASSIGNING FIELD-SYMBOL(<method_description>) WITH KEY name = co_method_constructor.
-        IF sy-subrc IS INITIAL.
-          LOOP AT <method_description>-parameters ASSIGNING FIELD-SYMBOL(<parameter_description>).
+        read table class_descriptor->methods assigning <method_description> with key name = co_method_constructor.
+        if sy-subrc is initial.
+          loop at <method_description>-parameters assigning <parameter_description>.
 
-            IF <parameter_description>-is_optional EQ abap_false
-            AND <parameter_description>-parm_kind CA co_interface_or_class.
+            if <parameter_description>-is_optional eq abap_false
+            and <parameter_description>-parm_kind ca co_interface_or_class.
 
-              DATA parameter_descriptor TYPE REF TO cl_abap_typedescr.
+              data parameter_descriptor type ref to cl_abap_typedescr.
 
               parameter_descriptor = class_descriptor->get_method_parameter_type(
                   p_method_name = co_method_constructor
                   p_parameter_name = <parameter_description>-name ).
 
-              IF parameter_descriptor->kind EQ cl_abap_typedescr=>kind_ref.
+              if parameter_descriptor->kind eq cl_abap_typedescr=>kind_ref.
                 reference_descriptor ?= parameter_descriptor.
-                DATA(parameter_type) = reference_descriptor->get_referenced_type( )->get_relative_name( ).
-              ENDIF.
+                parameter_type = reference_descriptor->get_referenced_type( )->get_relative_name( ).
+              endif.
 
               new_parameter-kind = 'E'.
               new_parameter-name = <parameter_description>-name.
 
-              CREATE DATA dependency TYPE REF TO (parameter_type).
-              ASSIGN dependency->* TO FIELD-SYMBOL(<dependency>).
+              create data dependency type ref to (parameter_type).
+              assign dependency->* to <dependency>.
 
-              me->get_instance( CHANGING c_target = <dependency> ).
+              me->get_instance( changing c_target = <dependency> ).
 
-              CREATE DATA new_parameter-value TYPE REF TO object.
+*              DATA(parameter_class_type) = cl_abap_classdescr=>describe_by_object_ref( <dependency> )->get_relative_name( ).
+              create data new_parameter-value type ref to object.
               new_parameter-value ?= dependency.
-              INSERT new_parameter INTO TABLE parameters.
+              insert new_parameter into table parameters.
 
-            ENDIF.
-          ENDLOOP.
+            endif.
+          endloop.
 
-        ENDIF.
+        endif.
 
-        IF parameters IS NOT INITIAL.
-          CREATE OBJECT c_target TYPE (class_name)
-            PARAMETER-TABLE parameters.
-        ELSE.
-          CREATE OBJECT c_target TYPE (class_name).
-        ENDIF.
+        if parameters is not initial.
+          create object c_target type (class_name)
+            parameter-table parameters.
+        else.
+          create object c_target type (class_name).
+        endif.
 
-      WHEN OTHERS.
-        RAISE EXCEPTION TYPE zcx_di_invalid_type.
+      when others.
+        raise exception type zcx_di_invalid_type.
 
-    ENDCASE.
+    endcase.
 
-  ENDMETHOD.
+  endmethod.
 
 
-  METHOD register.
+  method register.
 
-    IF cl_abap_typedescr=>describe_by_name( i_class_name )->kind NE cl_abap_typedescr=>kind_class.
-      RAISE EXCEPTION TYPE zcx_di_not_a_class.
-    ENDIF.
+    if cl_abap_typedescr=>describe_by_name( i_class_name )->kind ne cl_abap_typedescr=>kind_class.
+      raise exception type zcx_di_not_a_class.
+    endif.
 
-    me->_context->add( i_class_name = i_class_name i_namespace = me->_namespace ).
+    r_class_entity = me->_context->add( i_class_name = i_class_name i_namespace = me->_namespace ).
 
-  ENDMETHOD.
-
-ENDCLASS.
+  endmethod.
+endclass.

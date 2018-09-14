@@ -1,26 +1,31 @@
-CLASS zcl_di_context DEFINITION
-  PUBLIC
-  FINAL
-  CREATE PUBLIC .
+class zcl_di_context definition
+  public
+  final
+  create public .
 
-  PUBLIC SECTION.
-    TYPES:
-      BEGIN OF ty_class_register_entity,
-        time_added TYPE timestampl,
-        namespace  TYPE string,
-        class_name TYPE string,
-      END OF ty_class_register_entity,
+  public section.
+    types:
+      begin of ty_class_register_entity,
+        time_added type timestampl,
+        namespace  type string,
+        class_name type string,
+        as_singleton type abap_bool,
+        instance type ref to object,
+      end of ty_class_register_entity,
 
-      ty_class_register TYPE STANDARD TABLE OF ty_class_register_entity WITH KEY time_added.
+      ty_class_register type standard table of ty_class_register_entity with key time_added.
 
     "! <p class="shorttext synchronized" lang="en">Adding classes to the context</p>
     "!
-    "! @parameter i_namespace | <p class="shorttext synchronized" lang="en"></p>
-    "! @parameter i_class_name | <p class="shorttext synchronized" lang="en"></p>
-    METHODS add
-      IMPORTING
-        i_namespace  TYPE string
-        i_class_name TYPE string.
+    "! @parameter i_namespace | <p class="shorttext synchronized" lang="en">Namespace to be used</p>
+    "! @parameter i_class_name | <p class="shorttext synchronized" lang="en">Class name to be registered</p>
+    "! @parameter r_class_entity | < class="shorttext synchronized" lang="en">Class entity object</p>
+    methods add
+      importing
+        i_namespace  type string
+        i_class_name type string
+        i_instance type ref to object optional
+      returning value(r_class_entity) type ref to zcl_di_class_entity.
 
     "! <p class="shorttext synchronized" lang="en">Getting classes from context based on interface or class.</p>
     "! This method may raise <strong>zcx_di_class_not_found</strong> when there was no class in the context
@@ -29,64 +34,71 @@ CLASS zcl_di_context DEFINITION
     "! @parameter i_namespace | <p class="shorttext synchronized" lang="en">Namespace to look up.</p>
     "! @parameter i_class_name | <p class="shorttext synchronized" lang="en">Class name or interface</p>
     "! @parameter r_class_name | <p class="shorttext synchronized" lang="en">Found class name</p>
-    METHODS get
-      IMPORTING
-                i_namespace         TYPE string
-                i_class_name        TYPE string
-      RETURNING VALUE(r_class_name) TYPE string.
+    methods get
+      importing
+                i_namespace         type string
+                i_class_name        type string
+      returning value(r_class_entity) type ref to zcl_di_class_entity.
 
-  PROTECTED SECTION.
-  PRIVATE SECTION.
+  protected section.
+  private section.
 
-    DATA:
-      _class_register TYPE ty_class_register,
-      _new_entity     TYPE ty_class_register_entity.
+    data:
+      _class_register type ty_class_register,
+      _new_entity     type ty_class_register_entity.
 
-ENDCLASS.
+endclass.
 
 
 
-CLASS zcl_di_context IMPLEMENTATION.
+class zcl_di_context implementation.
 
-  METHOD add.
+  method add.
 
-    GET TIME STAMP FIELD me->_new_entity-time_added.
+    data registry_entry type ref to ty_class_register_entity.
+
+    get time stamp field me->_new_entity-time_added.
     me->_new_entity-namespace = i_namespace.
     me->_new_entity-class_name = i_class_name.
-    TRANSLATE me->_new_entity-class_name TO UPPER CASE.
+    translate me->_new_entity-class_name to upper case.
 
-    INSERT me->_new_entity INTO me->_class_register INDEX 1.
+    if i_instance is bound
+    and me->_new_entity-class_name ne cl_abap_typedescr=>describe_by_object_ref( i_instance )->get_relative_name( ).
+      raise exception type zcx_di_mismatching_type.
+    endif.
 
-  ENDMETHOD.
+    insert me->_new_entity into me->_class_register index 1 reference into registry_entry.
+    create object r_class_entity exporting i_registry_entry = registry_entry.
 
-  METHOD get.
+  endmethod.
 
-    DATA interface_descriptor TYPE REF TO cl_abap_intfdescr.
+  method get.
 
-    FIELD-SYMBOLS <class_register_entity> TYPE ty_class_register_entity.
+    data interface_descriptor type ref to cl_abap_intfdescr.
+    data registry_entry type ref to ty_class_register_entity.
 
-    LOOP AT me->_class_register
-        ASSIGNING <class_register_entity>
-        WHERE namespace EQ i_namespace.
+    loop at me->_class_register
+        reference into registry_entry
+        where namespace eq i_namespace.
 
-      IF <class_register_entity>-class_name EQ i_class_name.
-        r_class_name = i_class_name.
-        EXIT.
-      ENDIF.
+      if registry_entry->class_name eq i_class_name.
+        create object r_class_entity exporting i_registry_entry = registry_entry.
+        exit.
+      endif.
 
       interface_descriptor ?= cl_abap_intfdescr=>describe_by_name( i_class_name ).
 
-      IF interface_descriptor->applies_to_class( <class_register_entity>-class_name ).
-        r_class_name = <class_register_entity>-class_name.
-        EXIT.
-      ENDIF.
+      if interface_descriptor->applies_to_class( registry_entry->class_name ) eq abap_true.
+        create object r_class_entity exporting i_registry_entry = registry_entry.
+        exit.
+      endif.
 
-    ENDLOOP.
+    endloop.
 
-    IF r_class_name IS INITIAL.
-      RAISE EXCEPTION TYPE zcx_di_class_not_found.
-    ENDIF.
+    if r_class_entity is initial.
+      raise exception type zcx_di_class_not_found.
+    endif.
 
-  ENDMETHOD.
+  endmethod.
 
-ENDCLASS.
+endclass.
