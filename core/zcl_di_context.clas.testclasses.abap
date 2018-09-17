@@ -202,6 +202,12 @@ class ltc_get_should implementation.
         i_class_name = `ZCL_DI_TEST_SERVICE_1`
     ).
 
+    me->_cut->add(
+      exporting
+        i_namespace  = co_default_namespace
+        i_class_name = `ZCL_DI_TEST_SERVICE_2`
+    ).
+
     " Act
     class_name = me->_cut->get(
                    i_namespace  = co_default_namespace
@@ -264,7 +270,7 @@ class ltc_get_should implementation.
         cl_aunit_assert=>fail(
           msg = `Something was returned despite no data was provided.`
         ).
-      catch zcx_di_class_not_found.
+      catch zcx_di_missing_dependency.
                                                         "#EC NO_HANDLER
     endtry.
 

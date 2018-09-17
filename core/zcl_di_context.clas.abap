@@ -33,7 +33,7 @@ class zcl_di_context definition
     "!
     "! @parameter i_namespace | <p class="shorttext synchronized" lang="en">Namespace to look up.</p>
     "! @parameter i_class_name | <p class="shorttext synchronized" lang="en">Class name or interface</p>
-    "! @parameter r_class_name | <p class="shorttext synchronized" lang="en">Found class name</p>
+    "! @parameter r_class_entity | <p class="shorttext synchronized" lang="en">Class entity object</p>
     methods get
       importing
                 i_namespace         type string
@@ -61,6 +61,7 @@ class zcl_di_context implementation.
     me->_new_entity-namespace = i_namespace.
     me->_new_entity-class_name = i_class_name.
     translate me->_new_entity-class_name to upper case.
+    me->_new_entity-instance = i_instance.
 
     if i_instance is bound
     and me->_new_entity-class_name ne cl_abap_typedescr=>describe_by_object_ref( i_instance )->get_relative_name( ).
@@ -68,13 +69,16 @@ class zcl_di_context implementation.
     endif.
 
     insert me->_new_entity into me->_class_register index 1 reference into registry_entry.
-    create object r_class_entity exporting i_registry_entry = registry_entry.
+    create object r_class_entity
+      exporting
+        i_registry_entry = registry_entry.
 
   endmethod.
 
   method get.
 
     data interface_descriptor type ref to cl_abap_intfdescr.
+    data class_descriptor type ref to cl_abap_classdescr.
     data registry_entry type ref to ty_class_register_entity.
 
     loop at me->_class_register
@@ -82,21 +86,38 @@ class zcl_di_context implementation.
         where namespace eq i_namespace.
 
       if registry_entry->class_name eq i_class_name.
-        create object r_class_entity exporting i_registry_entry = registry_entry.
+        create object r_class_entity
+          exporting
+            i_registry_entry = registry_entry.
         exit.
       endif.
 
-      interface_descriptor ?= cl_abap_intfdescr=>describe_by_name( i_class_name ).
+      case cl_abap_typedescr=>describe_by_name( i_class_name )->kind.
+        when cl_abap_typedescr=>kind_intf.
 
-      if interface_descriptor->applies_to_class( registry_entry->class_name ) eq abap_true.
-        create object r_class_entity exporting i_registry_entry = registry_entry.
-        exit.
-      endif.
+          interface_descriptor ?= cl_abap_intfdescr=>describe_by_name( i_class_name ).
+
+          if interface_descriptor->applies_to_class( registry_entry->class_name ) eq abap_true.
+            create object r_class_entity
+              exporting
+                i_registry_entry = registry_entry.
+            exit.
+          endif.
+
+        when cl_abap_typedescr=>kind_class.
+          class_descriptor ?= cl_abap_classdescr=>describe_by_name( i_class_name ).
+          if class_descriptor->applies_to_class( registry_entry->class_name ) eq abap_true.
+            create object r_class_entity
+              exporting
+                i_registry_entry = registry_entry.
+            exit.
+          endif.
+      endcase.
 
     endloop.
 
     if r_class_entity is initial.
-      raise exception type zcx_di_class_not_found.
+      raise exception type zcx_di_missing_dependency.
     endif.
 
   endmethod.

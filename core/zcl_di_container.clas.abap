@@ -33,6 +33,15 @@ class zcl_di_container definition
         i_class_name type string
       returning value(r_class_entity) type ref to zcl_di_class_entity.
 
+
+    "! <p class="shorttext synchronized" lang="en">Register a class via a given instance</p>
+    "!
+    "! @parameter i_instance | <p class="shorttext synchronized" lang="en">Instance to be registered.</p>
+    methods register_instance
+      importing
+        i_instance type ref to object
+      returning value(r_class_entity) type ref to zcl_di_class_entity.
+
     "! <p class="shorttext synchronized" lang="en">This method tries to resolve dependencies.</p>
     "! With this method all dependencies will be resolved and <strong>c_target</strong> will be instantiated if it is possible.<br/>
     "!
@@ -43,16 +52,24 @@ class zcl_di_container definition
     "! <li>zcx_di_class_not_found : Not enough classes were registered using <strong>register</strong></li>
     "! </ul>
     "!
-    "! @parameter c_target | <p class="shorttext synchronized" lang="en"></p>
+    "! @parameter c_target | <p class="shorttext synchronized" lang="en">Reference which shall be instantiated</p>
     methods get_instance
       changing
         c_target type any.
+
+    "! <p class="shorttext synchronized" lang="en">Forces instantiation of optional dependecies if true.</p>
+    "!
+    "! @parameters i_value | <p class="shorttext synchronized" lang="en">true = force optional parameters / false = instantiate only non optional parameters</p>
+    methods force_optional_dependencies
+      importing
+        i_value type abap_bool default abap_true.
 
   protected section.
   private section.
 
     data _context type ref to zcl_di_context.
     data _namespace type string.
+    data _force_optional type abap_bool value abap_false.
 
     methods:
       constructor
@@ -139,7 +156,7 @@ class zcl_di_container implementation.
         if sy-subrc is initial.
           loop at <method_description>-parameters assigning <parameter_description>.
 
-            if <parameter_description>-is_optional eq abap_false
+            if ( <parameter_description>-is_optional eq abap_false or me->_force_optional eq abap_true )
             and <parameter_description>-parm_kind ca co_interface_or_class.
 
               data parameter_descriptor type ref to cl_abap_typedescr.
@@ -195,4 +212,28 @@ class zcl_di_container implementation.
     r_class_entity = me->_context->add( i_class_name = i_class_name i_namespace = me->_namespace ).
 
   endmethod.
+
+
+  method register_instance.
+
+    data class_descriptor type ref to cl_abap_classdescr.
+    data class_name type string.
+
+    if cl_abap_typedescr=>describe_by_object_ref( i_instance )->kind ne cl_abap_typedescr=>kind_class.
+      raise exception type zcx_di_not_a_class.
+    endif.
+
+    class_descriptor ?= cl_abap_typedescr=>describe_by_object_ref( i_instance ).
+    class_name = class_descriptor->get_relative_name( ).
+
+    r_class_entity = me->_context->add( i_class_name = class_name i_namespace = me->_namespace i_instance = i_instance ).
+
+  endmethod.
+
+  method force_optional_dependencies.
+
+    me->_force_optional = i_value.
+
+  endmethod.
+
 endclass.

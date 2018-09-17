@@ -177,8 +177,65 @@ risk level harmless.
     data _cut type ref to zcl_di_container.
 
     methods setup.
-    methods register_instance_to_context.
-    methods register_class_to_context.
+    methods register_instance_to_context for testing.
+    methods register_class_to_context for testing.
+
+endclass.
+
+class ltc_register_instance_should implementation.
+
+  method setup.
+
+    me->_cut = zcl_di_container=>create_default( ).
+
+  endmethod.
+
+  method register_instance_to_context.
+
+    data actual_instance type ref to object.
+    data instance type ref to zcl_di_test_service_2.
+
+
+    " Arrange
+    create object instance.
+
+    " Act
+    me->_cut->register_instance( instance ).
+    actual_instance ?= me->_cut->_context->get(
+        i_namespace  = me->_cut->_namespace
+        i_class_name = `ZCL_DI_TEST_SERVICE_2` )->instance( ).
+
+    " Assert
+    cl_aunit_assert=>assert_equals(
+      act = actual_instance
+      exp = instance
+      msg = `Class was not registered in context` ).
+
+  endmethod.
+
+  method register_class_to_context.
+
+    data actual_name type string.
+    data instance type ref to zcl_di_test_service_2.
+
+
+    " Arrange
+    create object instance.
+
+    " Act
+    me->_cut->register_instance( instance ).
+    actual_name = me->_cut->_context->get(
+        i_namespace  = me->_cut->_namespace
+        i_class_name = `ZCL_DI_TEST_SERVICE_2` )->class_name( ).
+
+    " Assert
+    cl_aunit_assert=>assert_equals(
+      act = actual_name
+      exp = `ZCL_DI_TEST_SERVICE_2`
+      msg = `Class was not registered in context` ).
+
+
+  endmethod.
 
 endclass.
 
@@ -259,7 +316,7 @@ class ltc_get_instance_should implementation.
 
         " Assert
         cl_aunit_assert=>fail( msg = `Exception was not triggered despite missing dependency.` ).
-      catch zcx_di_class_not_found.
+      catch zcx_di_missing_dependency.
                                                         "#EC NO_HANDLER
     endtry.
 
@@ -320,6 +377,50 @@ class ltc_get_instance_should implementation.
       catch zcx_di_invalid_type.
                                                         "#EC NO_HANDLER
     endtry.
+
+  endmethod.
+
+endclass.
+
+class ltc_force_optional_dep_should definition for testing final
+duration short
+risk level harmless.
+
+  private section.
+
+    data _cut type ref to zcl_di_container.
+
+    methods setup.
+    methods force_opt_params_to_instance for testing.
+
+
+endclass.
+
+class ltc_force_optional_dep_should implementation.
+
+  method setup.
+
+    me->_cut = zcl_di_container=>create_default( ).
+
+  endmethod.
+
+  method force_opt_params_to_instance.
+
+    data service type ref to zcl_di_test_service_1.
+
+    " Arrange
+    me->_cut->register( `ZCL_DI_TEST_SERVICE_1` ).
+    me->_cut->register( `zcl_di_test_dependency_1_a` ).
+    me->_cut->register( `zcl_di_test_dependency_2` ).
+
+    " Act
+    me->_cut->force_optional_dependencies( ).
+    me->_cut->get_instance( changing c_target = service ).
+
+    " Assert
+    if service->_dependency_3 is not bound.
+      cl_aunit_assert=>fail( msg = `Optional dependency was not instantiated.` ).
+    endif.
 
   endmethod.
 
