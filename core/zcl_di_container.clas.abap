@@ -7,7 +7,7 @@ class zcl_di_container definition
 
     constants co_default_namespace  type string value `urn:default`.
     constants co_method_constructor type string value `CONSTRUCTOR`.
-    constants co_interface_or_class type string value `ICRicr`.
+    constants co_interface_or_class type string value `*+r`. " TODO: need to be renamed
 
     "! <p class="shorttext synchronized" lang="en">This will create a new DI-Container</p>
     "! If no <strong>context</strong> will be provided a default one will be created.
