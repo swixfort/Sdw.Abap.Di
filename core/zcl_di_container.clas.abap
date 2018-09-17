@@ -7,7 +7,7 @@ class zcl_di_container definition
 
     constants co_default_namespace  type string value `urn:default`.
     constants co_method_constructor type string value `CONSTRUCTOR`.
-    constants co_interface_or_class type string value `IC`.
+    constants co_interface_or_class type string value `ICRicr`.
 
     "! <p class="shorttext synchronized" lang="en">This will create a new DI-Container</p>
     "! If no <strong>context</strong> will be provided a default one will be created.
@@ -157,7 +157,7 @@ class zcl_di_container implementation.
           loop at <method_description>-parameters assigning <parameter_description>.
 
             if ( <parameter_description>-is_optional eq abap_false or me->_force_optional eq abap_true )
-            and <parameter_description>-parm_kind ca co_interface_or_class.
+            and <parameter_description>-type_kind ca co_interface_or_class.
 
               data parameter_descriptor type ref to cl_abap_typedescr.
 
