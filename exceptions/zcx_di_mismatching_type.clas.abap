@@ -1,33 +1,34 @@
-class zcx_di_mismatching_type definition
-  public
-  inheriting from zcx_di
-  final
-  create public .
+CLASS zcx_di_mismatching_type DEFINITION
+  PUBLIC
+  INHERITING FROM zcx_di
+  FINAL
+  CREATE PUBLIC .
 
-public section.
+  PUBLIC SECTION.
 
-  methods CONSTRUCTOR
-    importing
-      !TEXTID like IF_T100_MESSAGE=>T100KEY optional
-      !PREVIOUS like PREVIOUS optional .
-  protected section.
-  private section.
+    METHODS constructor
+      IMPORTING
+        !textid   LIKE if_t100_message=>t100key OPTIONAL
+        !previous LIKE previous OPTIONAL .
+  PROTECTED SECTION.
+  PRIVATE SECTION.
 ENDCLASS.
 
 
 
-CLASS ZCX_DI_MISMATCHING_TYPE IMPLEMENTATION.
+CLASS zcx_di_mismatching_type IMPLEMENTATION.
 
 
-  method constructor ##adt_suppress_generation.
-    call method super->constructor
-      exporting
+  METHOD constructor ##ADT_SUPPRESS_GENERATION.
+    CALL METHOD super->constructor
+      EXPORTING
         previous = previous.
-    clear me->textid.
-    if textid is initial.
+    CLEAR me->textid.
+    IF textid IS INITIAL.
       if_t100_message~t100key = if_t100_message=>default_textid.
-    else.
+    ELSE.
       if_t100_message~t100key = textid.
-    endif.
-  endmethod.
+    ENDIF.
+  ENDMETHOD.
 ENDCLASS.
+

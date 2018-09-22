@@ -1,31 +1,31 @@
 *"* use this source file for your ABAP unit test classes
-class ltc_as_instance_should definition for testing final
-duration short
-risk level harmless.
+CLASS ltc_as_instance_should DEFINITION FOR TESTING FINAL
+DURATION SHORT
+RISK LEVEL HARMLESS.
 
-  private section.
-    data _cut type ref to zcl_di_class_entity.
+  PRIVATE SECTION.
+    DATA _cut TYPE REF TO zcl_di_class_entity.
 
-    methods setup.
-    methods create_inst__given_not_bound for testing.
-    methods do_nothing__given_bound for testing.
+    METHODS setup.
+    METHODS create_inst__given_not_bound FOR TESTING.
+    METHODS do_nothing__given_bound FOR TESTING.
 
-endclass.
+ENDCLASS.
 
-class ltc_as_instance_should implementation.
+CLASS ltc_as_instance_should IMPLEMENTATION.
 
-  method setup.
-  endmethod.
+  METHOD setup.
+  ENDMETHOD.
 
-  method create_inst__given_not_bound.
+  METHOD create_inst__given_not_bound.
 
-    data registry_entry type ref to zcl_di_context=>ty_class_register_entity.
+    DATA registry_entry TYPE REF TO zcl_di_context=>ty_class_register_entity.
 
     " Arrange
-    create data registry_entry.
+    CREATE DATA registry_entry.
     registry_entry->class_name = `ZCL_DI_TEST_SERVICE_2`.
-    create object me->_cut
-      exporting
+    CREATE OBJECT me->_cut
+      EXPORTING
         i_registry_entry = registry_entry.
 
     " Act
@@ -37,20 +37,20 @@ class ltc_as_instance_should implementation.
       msg = `Instance was not created.`
     ).
 
-  endmethod.
+  ENDMETHOD.
 
-  method do_nothing__given_bound.
+  METHOD do_nothing__given_bound.
 
-    data registry_entry type ref to zcl_di_context=>ty_class_register_entity.
-    data instance type ref to zcl_di_test_service_2.
+    DATA registry_entry TYPE REF TO zcl_di_context=>ty_class_register_entity.
+    DATA instance TYPE REF TO zcl_di_test_service_2.
 
     " Arrange
-    create data registry_entry.
+    CREATE DATA registry_entry.
     registry_entry->class_name = `ZCL_DI_TEST_SERVICE_2`.
-    create object registry_entry->instance type zcl_di_test_service_2.
+    CREATE OBJECT registry_entry->instance TYPE zcl_di_test_service_2.
     instance ?= registry_entry->instance.
-    create object me->_cut
-      exporting
+    CREATE OBJECT me->_cut
+      EXPORTING
         i_registry_entry = registry_entry.
 
     " Act
@@ -63,6 +63,6 @@ class ltc_as_instance_should implementation.
       msg = `Instance was created despite initial bound value.`
     ).
 
-  endmethod.
+  ENDMETHOD.
 
-endclass.
+ENDCLASS.

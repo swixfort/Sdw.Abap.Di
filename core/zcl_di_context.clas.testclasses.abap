@@ -1,37 +1,37 @@
 *"* use this source file for your ABAP unit test classes
-class ltc_add_should definition for testing final
-duration short
-risk level harmless.
+CLASS ltc_add_should DEFINITION FOR TESTING FINAL
+DURATION SHORT
+RISK LEVEL HARMLESS.
 
-  public section.
-    constants:
-      co_default_namespace type string value `urn:default`.
+  PUBLIC SECTION.
+    CONSTANTS:
+      co_default_namespace TYPE string VALUE `urn:default`.
 
-  private section.
-    data _cut type ref to zcl_di_context.
+  PRIVATE SECTION.
+    DATA _cut TYPE REF TO zcl_di_context.
 
-    methods:
+    METHODS:
       setup,
-      add_to_register for testing,
-      add_twice__given_same_call for testing,
-      convert_to_upper_case for testing.
-    methods raise_error__given_wrong_type for testing.
-    methods add_to_reg__given_correct_type for testing.
-    methods return_class_entity_object for testing.
+      add_to_register FOR TESTING,
+      add_twice__given_same_call FOR TESTING,
+      convert_to_upper_case FOR TESTING.
+    METHODS raise_error__given_wrong_type FOR TESTING.
+    METHODS add_to_reg__given_correct_type FOR TESTING.
+    METHODS return_class_entity_object FOR TESTING.
 
-endclass.
+ENDCLASS.
 
-class ltc_add_should implementation.
+CLASS ltc_add_should IMPLEMENTATION.
 
-  method setup.
+  METHOD setup.
 
-    create object me->_cut.
+    CREATE OBJECT me->_cut.
 
-  endmethod.
+  ENDMETHOD.
 
-  method add_to_register.
+  METHOD add_to_register.
 
-    data expected_entry_count type int4.
+    DATA expected_entry_count TYPE int4.
 
     " Arrange
     expected_entry_count = lines( me->_cut->_class_register ) + 1.
@@ -48,9 +48,9 @@ class ltc_add_should implementation.
         act = lines( me->_cut->_class_register )
         msg = `Register wasn't updated correctly.`
     ).
-  endmethod.
-  method add_twice__given_same_call.
-    data expected_entry_count type int4.
+  ENDMETHOD.
+  METHOD add_twice__given_same_call.
+    DATA expected_entry_count TYPE int4.
     " Arrange
     expected_entry_count = lines( me->_cut->_class_register ) + 2.
     " Act
@@ -69,9 +69,9 @@ class ltc_add_should implementation.
         msg = `Register wasn't updated correctly.`
     ).
 
-  endmethod.
+  ENDMETHOD.
 
-  method convert_to_upper_case.
+  METHOD convert_to_upper_case.
 
     " Arrange
     me->_cut->add(
@@ -80,27 +80,27 @@ class ltc_add_should implementation.
         ).
 
     " Act
-    read table me->_cut->_class_register
-        transporting no fields
-        with key class_name = `ZCL_DI_TEST_SERVICE_1`.
+    READ TABLE me->_cut->_class_register
+        TRANSPORTING NO FIELDS
+        WITH KEY class_name = `ZCL_DI_TEST_SERVICE_1`.
 
     " Assert
-    if sy-subrc is not initial.
+    IF sy-subrc IS NOT INITIAL.
       cl_aunit_assert=>fail( `Class name was not translated to upper case.` ).
-    endif.
+    ENDIF.
 
-  endmethod.
+  ENDMETHOD.
 
-  method raise_error__given_wrong_type.
+  METHOD raise_error__given_wrong_type.
 
-    data instance type ref to zcl_di_test_service_2.
+    DATA instance TYPE REF TO zcl_di_test_service_2.
 
 
     " Arrange
-    create object instance.
+    CREATE OBJECT instance.
 
     " Act
-    try.
+    TRY.
         me->_cut->add(
                 i_namespace = co_default_namespace
                 i_class_name = `Zcl_Di_Test_Service_1`
@@ -108,36 +108,36 @@ class ltc_add_should implementation.
 
         cl_aunit_assert=>fail( `No exception was raised despite mismatching type.` ).
         " Assert
-      catch zcx_di_mismatching_type.
-    endtry.
+      CATCH zcx_di_mismatching_type.
+    ENDTRY.
 
-  endmethod.
+  ENDMETHOD.
 
-  method add_to_reg__given_correct_type.
+  METHOD add_to_reg__given_correct_type.
 
-    data instance type ref to zcl_di_test_service_2.
+    DATA instance TYPE REF TO zcl_di_test_service_2.
 
 
     " Arrange
-    create object instance.
+    CREATE OBJECT instance.
 
     " Act
-    try.
+    TRY.
         me->_cut->add(
                 i_namespace = co_default_namespace
                 i_class_name = `Zcl_Di_Test_Service_2`
                 i_instance = instance ).
 
         " Assert
-      catch zcx_di_mismatching_type.
+      CATCH zcx_di_mismatching_type.
         cl_aunit_assert=>fail( `No exception was raised despite matching type.` ).
-    endtry.
+    ENDTRY.
 
-  endmethod.
+  ENDMETHOD.
 
   METHOD return_class_entity_object.
 
-    data class_entity type ref to zcl_di_class_entity.
+    DATA class_entity TYPE REF TO zcl_di_class_entity.
 
     " Arrange
     " Act
@@ -147,63 +147,63 @@ class ltc_add_should implementation.
 
     " Assert
     cl_aunit_assert=>assert_bound(
-      exporting
+      EXPORTING
         act = class_entity
         msg = `No class entity was returned.` ).
 
 
   ENDMETHOD.
 
-endclass.
+ENDCLASS.
 
-class ltc_get_should definition for testing final
-duration short
-risk level harmless.
+CLASS ltc_get_should DEFINITION FOR TESTING FINAL
+DURATION SHORT
+RISK LEVEL HARMLESS.
 
-  public section.
-    constants:
-      co_default_namespace type string value `urn:default`.
+  PUBLIC SECTION.
+    CONSTANTS:
+      co_default_namespace TYPE string VALUE `urn:default`.
 
-  private section.
-    data _cut type ref to zcl_di_context.
+  PRIVATE SECTION.
+    DATA _cut TYPE REF TO zcl_di_context.
 
-    methods:
+    METHODS:
       setup,
-      ret_latest_cls__given_cls_name for testing,
-      ret_latest_cls__given_if_name for testing,
-      raise_exception__given_no_data for testing.
+      ret_latest_cls__given_cls_name FOR TESTING,
+      ret_latest_cls__given_if_name FOR TESTING,
+      raise_exception__given_no_data FOR TESTING.
 
 
 
-endclass.
+ENDCLASS.
 
-class ltc_get_should implementation.
+CLASS ltc_get_should IMPLEMENTATION.
 
-  method setup.
+  METHOD setup.
 
-    create object me->_cut.
+    CREATE OBJECT me->_cut.
 
-  endmethod.
+  ENDMETHOD.
 
-  method ret_latest_cls__given_cls_name.
+  METHOD ret_latest_cls__given_cls_name.
 
-    data class_name type string.
+    DATA class_name TYPE string.
 
     " Arrange
     me->_cut->add(
-      exporting
+      EXPORTING
         i_namespace  = co_default_namespace
         i_class_name = `ZCL_DI_TEST_SERVICE_2`
     ).
 
     me->_cut->add(
-      exporting
+      EXPORTING
         i_namespace  = co_default_namespace
         i_class_name = `ZCL_DI_TEST_SERVICE_1`
     ).
 
     me->_cut->add(
-      exporting
+      EXPORTING
         i_namespace  = co_default_namespace
         i_class_name = `ZCL_DI_TEST_SERVICE_2`
     ).
@@ -221,21 +221,21 @@ class ltc_get_should implementation.
       msg = `Wrong class name was returned.`
     ).
 
-  endmethod.
+  ENDMETHOD.
 
-  method ret_latest_cls__given_if_name.
+  METHOD ret_latest_cls__given_if_name.
 
-    data class_name type string.
+    DATA class_name TYPE string.
 
     " Arrange
     me->_cut->add(
-      exporting
+      EXPORTING
         i_namespace  = co_default_namespace
         i_class_name = `ZCL_DI_TEST_SERVICE_2`
     ).
 
     me->_cut->add(
-      exporting
+      EXPORTING
         i_namespace  = co_default_namespace
         i_class_name = `ZCL_DI_TEST_SERVICE_1`
     ).
@@ -253,14 +253,14 @@ class ltc_get_should implementation.
       msg = `Wrong class name was returned.`
     ).
 
-  endmethod.
+  ENDMETHOD.
 
-  method raise_exception__given_no_data.
+  METHOD raise_exception__given_no_data.
 
     " Arrange
 
     " Act
-    try.
+    TRY.
         me->_cut->get(
                     i_namespace  = co_default_namespace
                       i_class_name = `ZCL_DI_TEST_SERVICE_1`
@@ -270,11 +270,11 @@ class ltc_get_should implementation.
         cl_aunit_assert=>fail(
           msg = `Something was returned despite no data was provided.`
         ).
-      catch zcx_di_missing_dependency.
+      CATCH zcx_di_missing_dependency.
                                                         "#EC NO_HANDLER
-    endtry.
+    ENDTRY.
 
 
-  endmethod.
+  ENDMETHOD.
 
-endclass.
+ENDCLASS.

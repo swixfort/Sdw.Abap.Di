@@ -1,4 +1,4 @@
-CLASS zcx_di_missing_dependency DEFINITION
+CLASS zcx_di_class_not_found DEFINITION
   PUBLIC
   INHERITING FROM zcx_di
   FINAL
@@ -16,7 +16,7 @@ ENDCLASS.
 
 
 
-CLASS zcx_di_missing_dependency IMPLEMENTATION.
+CLASS zcx_di_class_not_found IMPLEMENTATION.
 
 
   METHOD constructor ##ADT_SUPPRESS_GENERATION.
