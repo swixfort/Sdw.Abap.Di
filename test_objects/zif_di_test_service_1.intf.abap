@@ -1,4 +1,6 @@
-interface ZIF_DI_TEST_SERVICE_1
-  public .
+INTERFACE zif_di_test_service_1
+  PUBLIC .
 
-endinterface.
+  METHODS write.
+
+ENDINTERFACE.

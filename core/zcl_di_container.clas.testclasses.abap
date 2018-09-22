@@ -1,5 +1,5 @@
 *"* use this source file for your ABAP unit test classes
-CLASS ltc_create_default_should DEFINITION FOR TESTING
+CLASS ltc_create_default_should DEFINITION FOR TESTING FINAL
 DURATION SHORT
 RISK LEVEL HARMLESS.
 
@@ -88,7 +88,7 @@ CLASS ltc_create_default_should IMPLEMENTATION.
 ENDCLASS.
 
 
-CLASS ltc_register_should DEFINITION FOR TESTING
+CLASS ltc_register_should DEFINITION FOR TESTING FINAL
   DURATION SHORT
   RISK LEVEL HARMLESS.
 
@@ -124,6 +124,7 @@ CLASS ltc_register_should IMPLEMENTATION.
         " Assert
         cl_aunit_assert=>fail( msg = `Registration successful despite no valid class.` ).
       CATCH zcx_di_not_a_class.
+                                                        "#EC NO_HANDLER
     ENDTRY.
 
   ENDMETHOD.
@@ -136,7 +137,7 @@ CLASS ltc_register_should IMPLEMENTATION.
     me->_cut->register( `ZCL_DI_TEST_SERVICE_1` ).
     actual_name = me->_cut->_context->get(
         i_namespace  = me->_cut->_namespace
-        i_class_name = `ZCL_DI_TEST_SERVICE_1` ).
+        i_class_name = `ZCL_DI_TEST_SERVICE_1` )->class_name( ).
 
     " Assert
     cl_aunit_assert=>assert_equals(
@@ -155,7 +156,7 @@ CLASS ltc_register_should IMPLEMENTATION.
     me->_cut->register( `Zcl_DI_teST_SERvICE_1` ).
     actual_name = me->_cut->_context->get(
         i_namespace  = me->_cut->_namespace
-        i_class_name = `ZCL_DI_TEST_SERVICE_1` ).
+        i_class_name = `ZCL_DI_TEST_SERVICE_1` )->class_name( ).
 
     " Assert
     cl_aunit_assert=>assert_equals(
@@ -165,9 +166,80 @@ CLASS ltc_register_should IMPLEMENTATION.
 
   ENDMETHOD.
 
-ENDCLASS.       "ltc_Container_Should
+ENDCLASS.
 
-CLASS ltc_get_instance_should DEFINITION FOR TESTING
+CLASS ltc_register_instance_should DEFINITION FOR TESTING FINAL
+DURATION SHORT
+RISK LEVEL HARMLESS.
+
+  PRIVATE SECTION.
+
+    DATA _cut TYPE REF TO zcl_di_container.
+
+    METHODS setup.
+    METHODS register_instance_to_context FOR TESTING.
+    METHODS register_class_to_context FOR TESTING.
+
+ENDCLASS.
+
+CLASS ltc_register_instance_should IMPLEMENTATION.
+
+  METHOD setup.
+
+    me->_cut = zcl_di_container=>create_default( ).
+
+  ENDMETHOD.
+
+  METHOD register_instance_to_context.
+
+    DATA actual_instance TYPE REF TO object.
+    DATA instance TYPE REF TO zcl_di_test_service_2.
+
+
+    " Arrange
+    CREATE OBJECT instance.
+
+    " Act
+    me->_cut->register_instance( instance ).
+    actual_instance ?= me->_cut->_context->get(
+        i_namespace  = me->_cut->_namespace
+        i_class_name = `ZCL_DI_TEST_SERVICE_2` )->instance( ).
+
+    " Assert
+    cl_aunit_assert=>assert_equals(
+      act = actual_instance
+      exp = instance
+      msg = `Class was not registered in context` ).
+
+  ENDMETHOD.
+
+  METHOD register_class_to_context.
+
+    DATA actual_name TYPE string.
+    DATA instance TYPE REF TO zcl_di_test_service_2.
+
+
+    " Arrange
+    CREATE OBJECT instance.
+
+    " Act
+    me->_cut->register_instance( instance ).
+    actual_name = me->_cut->_context->get(
+        i_namespace  = me->_cut->_namespace
+        i_class_name = `ZCL_DI_TEST_SERVICE_2` )->class_name( ).
+
+    " Assert
+    cl_aunit_assert=>assert_equals(
+      act = actual_name
+      exp = `ZCL_DI_TEST_SERVICE_2`
+      msg = `Class was not registered in context` ).
+
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+CLASS ltc_get_instance_should DEFINITION FOR TESTING FINAL
 DURATION SHORT
 RISK LEVEL HARMLESS.
 
@@ -244,7 +316,8 @@ CLASS ltc_get_instance_should IMPLEMENTATION.
 
         " Assert
         cl_aunit_assert=>fail( msg = `Exception was not triggered despite missing dependency.` ).
-      CATCH zcx_di_class_not_found.
+      CATCH zcx_di_missing_dependency.
+                                                        "#EC NO_HANDLER
     ENDTRY.
 
   ENDMETHOD.
@@ -268,6 +341,7 @@ CLASS ltc_get_instance_should IMPLEMENTATION.
         cl_aunit_assert=>fail( msg = `No exception was thrown despite already bound parameter.`).
 
       CATCH zcx_di_target_already_bound.
+                                                        "#EC NO_HANDLER
     ENDTRY.
 
   ENDMETHOD.
@@ -301,7 +375,52 @@ CLASS ltc_get_instance_should IMPLEMENTATION.
         " Assert
         cl_aunit_assert=>fail( msg = `Exception was not raised despite invalid type.` ).
       CATCH zcx_di_invalid_type.
+                                                        "#EC NO_HANDLER
     ENDTRY.
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+CLASS ltc_force_optional_dep_should DEFINITION FOR TESTING FINAL
+DURATION SHORT
+RISK LEVEL HARMLESS.
+
+  PRIVATE SECTION.
+
+    DATA _cut TYPE REF TO zcl_di_container.
+
+    METHODS setup.
+    METHODS force_opt_params_to_instance FOR TESTING.
+
+
+ENDCLASS.
+
+CLASS ltc_force_optional_dep_should IMPLEMENTATION.
+
+  METHOD setup.
+
+    me->_cut = zcl_di_container=>create_default( ).
+
+  ENDMETHOD.
+
+  METHOD force_opt_params_to_instance.
+
+    DATA service TYPE REF TO zcl_di_test_service_1.
+
+    " Arrange
+    me->_cut->register( `ZCL_DI_TEST_SERVICE_1` ).
+    me->_cut->register( `zcl_di_test_dependency_1_a` ).
+    me->_cut->register( `zcl_di_test_dependency_2` ).
+
+    " Act
+    me->_cut->force_optional_dependencies( ).
+    me->_cut->get_instance( CHANGING c_target = service ).
+
+    " Assert
+    IF service->_dependency_3 IS NOT BOUND.
+      cl_aunit_assert=>fail( msg = `Optional dependency was not instantiated.` ).
+    ENDIF.
 
   ENDMETHOD.
 
