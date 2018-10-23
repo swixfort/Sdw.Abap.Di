@@ -59,7 +59,7 @@ CLASS zcl_di_container DEFINITION
 
     "! <p class="shorttext synchronized" lang="en">Forces instantiation of optional dependecies if true.</p>
     "!
-    "! @parameters i_value | <p class="shorttext synchronized" lang="en">true = force optional parameters / false = instantiate only non optional parameters</p>
+    "! @parameter i_value | <p class="shorttext synchronized" lang="en"> force optional params / = only non optional params</p>
     METHODS force_optional_dependencies
       IMPORTING
         i_value TYPE abap_bool DEFAULT abap_true.
