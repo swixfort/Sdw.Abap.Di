@@ -130,7 +130,7 @@ CLASS ltc_add_should IMPLEMENTATION.
 
         " Assert
       CATCH zcx_di_mismatching_type.
-        cl_aunit_assert=>fail( `No exception was raised despite matching type.` ).
+        cl_aunit_assert=>fail( `Exception was raised despite matching type.` ).
     ENDTRY.
 
   ENDMETHOD.
@@ -171,7 +171,8 @@ RISK LEVEL HARMLESS.
       setup,
       ret_latest_cls__given_cls_name FOR TESTING,
       ret_latest_cls__given_if_name FOR TESTING,
-      raise_exception__given_no_data FOR TESTING.
+      raise_exception__given_no_data FOR TESTING,
+      ret_entry__given_reg_instance FOR TESTING.
 
 
 
@@ -274,6 +275,29 @@ CLASS ltc_get_should IMPLEMENTATION.
                                                         "#EC NO_HANDLER
     ENDTRY.
 
+
+  ENDMETHOD.
+
+  METHOD ret_entry__given_reg_instance.
+
+    " Arrange
+    DATA(instance) = NEW zcl_di_test_service_2( ).
+    DATA(container) = zcl_di_container=>create_default( i_context = me->_cut ).
+
+    " Act
+    container->register_instance( instance ).
+    DATA(entity) = me->_cut->get( i_namespace = co_default_namespace i_class_name = `zcl_di_test_service_2`).
+
+    " Assert
+    cl_aunit_assert=>assert_equals(
+        exp = `ZCL_DI_TEST_SERVICE_2`
+        act = entity->class_name( )
+        msg = `Class names don't match after register instance.` ).
+
+    cl_aunit_assert=>assert_equals(
+        exp = instance
+        act = entity->instance( )
+        msg = `Instance don't match after register instance.` ).
 
   ENDMETHOD.
 
