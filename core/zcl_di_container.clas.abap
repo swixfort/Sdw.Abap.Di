@@ -142,8 +142,8 @@ CLASS zcl_di_container IMPLEMENTATION.
         OR cl_abap_typedescr=>kind_intf.
 
         class_entity = me->_context->get(
-          i_namespace  = me->_namespace
-          i_class_name = referenced_type_name ).
+                            i_namespace  = me->_namespace
+                            i_class_name = referenced_type_name ).
         IF class_entity->instance( ) IS BOUND.
           c_target ?= class_entity->instance( ).
           RETURN.
@@ -178,7 +178,6 @@ CLASS zcl_di_container IMPLEMENTATION.
 
               me->get_instance( CHANGING c_target = <dependency> ).
 
-*              DATA(parameter_class_type) = cl_abap_classdescr=>describe_by_object_ref( <dependency> )->get_relative_name( ).
               CREATE DATA new_parameter-value TYPE REF TO object.
               new_parameter-value ?= dependency.
               INSERT new_parameter INTO TABLE parameters.
@@ -217,14 +216,13 @@ CLASS zcl_di_container IMPLEMENTATION.
   METHOD register_instance.
 
     DATA class_descriptor TYPE REF TO cl_abap_classdescr.
-    DATA class_name TYPE string.
 
     IF cl_abap_typedescr=>describe_by_object_ref( i_instance )->kind NE cl_abap_typedescr=>kind_class.
       RAISE EXCEPTION TYPE zcx_di_not_a_class.
     ENDIF.
 
     class_descriptor ?= cl_abap_typedescr=>describe_by_object_ref( i_instance ).
-    class_name = class_descriptor->get_relative_name( ).
+    DATA(class_name) = class_descriptor->get_relative_name( ).
 
     r_class_entity = me->_context->add( i_class_name = class_name i_namespace = me->_namespace i_instance = i_instance ).
 
