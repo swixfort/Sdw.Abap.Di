@@ -19,7 +19,7 @@ CLASS zcl_di_context DEFINITION
     "!
     "! @parameter i_namespace | <p class="shorttext synchronized" lang="en">Namespace to be used</p>
     "! @parameter i_class_name | <p class="shorttext synchronized" lang="en">Class name to be registered</p>
-    "! @parameter r_class_entity | < class="shorttext synchronized" lang="en">Class entity object</p>
+    "! @parameter r_class_entity | <p class="shorttext synchronized" lang="en">Class entity object</p>
     METHODS add
       IMPORTING
                 i_namespace           TYPE string
@@ -79,8 +79,7 @@ CLASS zcl_di_context IMPLEMENTATION.
 
   METHOD get.
 
-    DATA interface_descriptor TYPE REF TO cl_abap_intfdescr.
-    DATA class_descriptor TYPE REF TO cl_abap_classdescr.
+    DATA object_descr TYPE REF TO cl_abap_objectdescr.
     DATA registry_entry TYPE REF TO ty_class_register_entity.
 
     LOOP AT me->_class_register
@@ -94,27 +93,16 @@ CLASS zcl_di_context IMPLEMENTATION.
         EXIT.
       ENDIF.
 
-      CASE cl_abap_typedescr=>describe_by_name( i_class_name )->kind.
-        WHEN cl_abap_typedescr=>kind_intf.
+      object_descr ?= cl_abap_typedescr=>describe_by_name( i_class_name ).
 
-          interface_descriptor ?= cl_abap_intfdescr=>describe_by_name( i_class_name ).
-
-          IF interface_descriptor->applies_to_class( registry_entry->class_name ) EQ abap_true.
-            CREATE OBJECT r_class_entity
-              EXPORTING
-                i_registry_entry = registry_entry.
-            EXIT.
-          ENDIF.
-
-        WHEN cl_abap_typedescr=>kind_class.
-          class_descriptor ?= cl_abap_classdescr=>describe_by_name( i_class_name ).
-          IF class_descriptor->applies_to_class( registry_entry->class_name ) EQ abap_true.
-            CREATE OBJECT r_class_entity
-              EXPORTING
-                i_registry_entry = registry_entry.
-            EXIT.
-          ENDIF.
-      ENDCASE.
+      IF ( registry_entry->instance IS BOUND
+      AND object_descr->applies_to( registry_entry->instance ) = abap_true )
+      OR object_descr->applies_to_class( registry_entry->class_name ) = abap_true.
+        CREATE OBJECT r_class_entity
+          EXPORTING
+            i_registry_entry = registry_entry.
+        EXIT.
+      ENDIF.
 
     ENDLOOP.
 

@@ -1,39 +1,46 @@
-class zcl_di_test_service_1 definition
-  public
-  final
-  create public .
+CLASS zcl_di_test_service_1 DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
 
-  public section.
-    interfaces zif_di_test_service_1.
-    data _dependency_3 type ref to zif_di_test_dependency_2 read-only.
+  PUBLIC SECTION.
+    INTERFACES zif_di_test_service_1.
+    DATA _dependency_3 TYPE REF TO zif_di_test_dependency_2 READ-ONLY.
 
-    methods:
+    METHODS:
       constructor
-        importing
-          i_dependency_1 type ref to zif_di_test_dependency_1
-          i_dependency_2 type ref to zif_di_test_dependency_2
-          i_dependency_3 type ref to zif_di_test_dependency_2 optional.
-  protected section.
-  private section.
-    data _dependency_1 type ref to zif_di_test_dependency_1.
-    data _dependency_2 type ref to zif_di_test_dependency_2.
-endclass.
+        IMPORTING
+          i_dependency_1 TYPE REF TO zif_di_test_dependency_1
+          i_dependency_2 TYPE REF TO zif_di_test_dependency_2
+          i_dependency_3 TYPE REF TO zif_di_test_dependency_2 OPTIONAL.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+    DATA _dependency_1 TYPE REF TO zif_di_test_dependency_1.
+    DATA _dependency_2 TYPE REF TO zif_di_test_dependency_2.
+ENDCLASS.
 
 
 
-class zcl_di_test_service_1 implementation.
-  method constructor.
+CLASS zcl_di_test_service_1 IMPLEMENTATION.
+  METHOD constructor.
 
     me->_dependency_1 = i_dependency_1.
     me->_dependency_2 = i_dependency_2.
     me->_dependency_3 = i_dependency_3.
 
-  endmethod.
+  ENDMETHOD.
 
-  method zif_di_test_service_1~write.
+  METHOD zif_di_test_service_1~write.
 
-    write: `zcl_di_test_service_1`.
+    WRITE:/ `zcl_di_test_service_1`.
+    IF me->_dependency_1 IS BOUND.
+      WRITE:/ `Dependency 1 loaded`.
+    ENDIF.
 
-  endmethod.
+    IF me->_dependency_2 IS BOUND.
+      WRITE:/ `Dependency 2 loaded`.
+    ENDIF.
 
-endclass.
+  ENDMETHOD.
+
+ENDCLASS.
