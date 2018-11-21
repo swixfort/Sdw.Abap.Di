@@ -338,7 +338,7 @@ CLASS ltc_get_instance_should IMPLEMENTATION.
         ).
 
         " Assert
-        cl_aunit_assert=>fail( msg = `No exception was thrown despite already bound parameter.`).
+        cl_aunit_assert=>fail( msg = `No exception was thrown despite already bound parameter.` ).
 
       CATCH zcx_di_target_already_bound.
                                                         "#EC NO_HANDLER
