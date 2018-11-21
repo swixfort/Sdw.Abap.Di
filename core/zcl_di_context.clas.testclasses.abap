@@ -286,7 +286,7 @@ CLASS ltc_get_should IMPLEMENTATION.
 
     " Act
     container->register_instance( instance ).
-    DATA(entity) = me->_cut->get( i_namespace = co_default_namespace i_class_name = `zcl_di_test_service_2`).
+    DATA(entity) = me->_cut->get( i_namespace = co_default_namespace i_class_name = `zcl_di_test_service_2` ).
 
     " Assert
     cl_aunit_assert=>assert_equals(
