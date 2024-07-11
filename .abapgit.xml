@@ -13,6 +13,7 @@
     <item>/.travis.yml</item>
     <item>/abaplint.json</item>
    </IGNORE>
+   <VERSION_CONSTANT>ZIF_DI_VERSION=&gt;C_ABAP_VERSION</VERSION_CONSTANT>
   </DATA>
  </asx:values>
 </asx:abap>
