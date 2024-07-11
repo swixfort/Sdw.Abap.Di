@@ -4,7 +4,6 @@
   <asx:values>
    <VSEOCLASS>
     <CLSNAME>ZCL_DI_CONTAINER</CLSNAME>
-    <VERSION>1</VERSION>
     <LANGU>E</LANGU>
     <DESCRIPT>DI: Container</DESCRIPT>
     <STATE>1</STATE>
@@ -15,31 +14,26 @@
    </VSEOCLASS>
    <DESCRIPTIONS>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_DI_CONTAINER</CLSNAME>
      <CMPNAME>CREATE_DEFAULT</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>This will create a new DI-Container</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_DI_CONTAINER</CLSNAME>
      <CMPNAME>FORCE_OPTIONAL_DEPENDENCIES</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Forces instantiation of optional dependecies if true.</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_DI_CONTAINER</CLSNAME>
      <CMPNAME>GET_INSTANCE</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>This method tries to resolve dependencies.</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_DI_CONTAINER</CLSNAME>
      <CMPNAME>REGISTER</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>This method registers a class with the context.</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_DI_CONTAINER</CLSNAME>
      <CMPNAME>REGISTER_INSTANCE</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Register a class via a given instance</DESCRIPT>
